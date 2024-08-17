@@ -47,7 +47,7 @@ else
 
     
     function main() {
-      // Fail if the b64 library or API was not loaded
+      //Fail if the b64 library or API was not loaded
       if (!("b64" in window)) {
         error("Base64 library not loaded.");
         return;
@@ -128,13 +128,7 @@ else
     <label for="output">output</label>
     <input type="text" id="output" readonly/>
     <button id="copy" onclick="onCopy('output')">Copy</button>
-    //<a href="../hidden" id="bookmark" target="_blank"><button>Create Hidden Bookmark</button></a>
-    //<a href="" id="open" target="_blank"><button>Open in New Tab</button></a>
-    //<!-- Special incantation to make TinyURL work -->
-    //<form action="http://tinyurl.com/create.php" method="get" target="_blank" style="display: inline;">
-      //<input type="hidden" id="source" name="source" value="indexpage" />
-    //<input type="hidden" id="tinyurl" name="url" value = "" />
-    //<button>Get Shortened Link</button>
+
     </form>
     <p class="alert">Copied</p>
   </div>
