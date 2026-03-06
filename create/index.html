@@ -1,1108 +1,255 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
-
+<html lang="en">
 <head>
-  <SCRIPT language="JavaScript">
-<!--hide
-//-->
-</SCRIPT>
-
+  <SCRIPT language="JavaScript"><!--hide //--></SCRIPT>
   <meta charset="utf-8" />
   <meta name="author" content="Anas Chawdhary" />
   <meta name="description" content="Password protect links using AES in the browser." />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-
   <link rel="shortcut icon" type="image/x-icon" href="../favicon.ico">
   <title>Link Lock — Password-Protect Your Links</title>
 
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"><\/script>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-
-  <!-- Scripts -->
-  <script type="text/javascript" src="../b64.js"></script>
-  <script type="text/javascript" src="../api.js"></script>
-  <script type="text/javascript">
-    function error(text) {
-      document.querySelector(".error").style.display = "flex";
-      document.querySelector("#errortext").innerText = `${text}`;
+  <script>
+    tailwind.config = {
+      theme: { extend: {
+        colors: {
+          gold: { DEFAULT:'#ca8a04', light:'#eab308', dim:'#a16207', ghost:'rgba(202,138,4,0.08)' },
+          ink:  { 900:'#111110', 800:'#181816', 700:'#1e1e1c', 600:'#252522', 500:'#2e2e2a', 400:'#3a3a35', 300:'#52524d', 200:'#a8a89e' }
+        },
+        fontFamily: { display:['Syne','sans-serif'], mono:['DM Mono','monospace'] }
+      }}
     }
-
-    function main() {
-      if (!("b64" in window)) {
-        error("Base64 library not loaded.");
-        return;
-      }
-      if (!("apiVersions" in window)) {
-        error("API library not loaded.");
-        return;
-      }
-    }
-  </script>
-  <script type="text/javascript" src="create.js"></script>
+  <\/script>
 
   <style>
-    :root {
-      --black-deep:    #080808;
-      --black-rich:    #0e0e0e;
-      --black-card:    #131313;
-      --black-panel:   #1a1a1a;
-      --black-border:  #242424;
-      --black-hover:   #2a2a2a;
-
-      --gold-bright:   #f5c842;
-      --gold-mid:      #d4a017;
-      --gold-deep:     #a07810;
-      --gold-muted:    #6b530d;
-      --gold-ghost:    #2a1f06;
-
-      --text-primary:  #f0e8d0;
-      --text-secondary:#b8a880;
-      --text-muted:    #6b6050;
-
-      --shadow-gold:   0 0 30px rgba(212, 160, 23, 0.15);
-      --shadow-deep:   0 20px 60px rgba(0,0,0,0.8);
-      --glow-gold:     0 0 20px rgba(245, 200, 66, 0.3);
-    }
-
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      background-color: var(--black-deep);
-      color: var(--text-primary);
-      font-family: 'Cormorant Garamond', Georgia, serif;
-      min-height: 100vh;
-      position: relative;
-      overflow-x: hidden;
-    }
-
-    /* ── Background texture ── */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background:
-        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(212,160,23,0.07) 0%, transparent 60%),
-        radial-gradient(ellipse 40% 40% at 90% 80%, rgba(212,160,23,0.04) 0%, transparent 50%),
-        repeating-linear-gradient(
-          0deg,
-          transparent,
-          transparent 60px,
-          rgba(255,255,255,0.008) 60px,
-          rgba(255,255,255,0.008) 61px
-        ),
-        repeating-linear-gradient(
-          90deg,
-          transparent,
-          transparent 60px,
-          rgba(255,255,255,0.008) 60px,
-          rgba(255,255,255,0.008) 61px
-        );
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* ── Corner ornaments ── */
-    body::after {
-      content: '';
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background:
-        radial-gradient(circle 3px at 20px 20px, var(--gold-muted) 100%, transparent),
-        radial-gradient(circle 3px at calc(100% - 20px) 20px, var(--gold-muted) 100%, transparent),
-        radial-gradient(circle 3px at 20px calc(100% - 20px), var(--gold-muted) 100%, transparent),
-        radial-gradient(circle 3px at calc(100% - 20px) calc(100% - 20px), var(--gold-muted) 100%, transparent);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .page-wrapper {
-      position: relative;
-      z-index: 1;
-      max-width: 680px;
-      margin: 0 auto;
-      padding: 48px 24px 64px;
-    }
-
-    /* ── Header ── */
-    .site-header {
-      text-align: center;
-      margin-bottom: 52px;
-      position: relative;
-    }
-
-    .header-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: linear-gradient(135deg, var(--gold-ghost), rgba(212,160,23,0.08));
-      border: 1px solid var(--gold-muted);
-      border-radius: 100px;
-      padding: 5px 16px;
-      margin-bottom: 24px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      letter-spacing: 0.2em;
-      color: var(--gold-mid);
-      text-transform: uppercase;
-    }
-
-    .header-badge i {
-      font-size: 9px;
-    }
-
-    .header-icon {
-      width: 72px;
-      height: 72px;
-      margin: 0 auto 20px;
-      background: linear-gradient(135deg, var(--black-panel), var(--black-card));
-      border: 1px solid var(--gold-muted);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: var(--shadow-gold), inset 0 1px 0 rgba(245,200,66,0.1);
-      position: relative;
-    }
-
-    .header-icon::before {
-      content: '';
-      position: absolute;
-      inset: -4px;
-      border-radius: 50%;
-      border: 1px solid rgba(212,160,23,0.15);
-    }
-
-    .header-icon i {
-      font-size: 28px;
-      background: linear-gradient(135deg, var(--gold-bright), var(--gold-mid));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .site-title {
-      font-family: 'Cinzel', serif;
-      font-size: clamp(28px, 6vw, 42px);
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      line-height: 1;
-      background: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold-mid) 50%, var(--gold-deep) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 10px;
-    }
-
-    .site-subtitle {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 15px;
-      font-style: italic;
-      font-weight: 300;
-      color: var(--text-secondary);
-      letter-spacing: 0.05em;
-      margin-bottom: 8px;
-    }
-
-    .site-tagline {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-    }
-
-    /* ── Divider ── */
-    .ornament-divider {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin: 0 auto 40px;
-      max-width: 320px;
-    }
-
-    .ornament-divider::before,
-    .ornament-divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--gold-muted));
-    }
-
-    .ornament-divider::after {
-      background: linear-gradient(90deg, var(--gold-muted), transparent);
-    }
-
-    .ornament-diamond {
-      width: 6px;
-      height: 6px;
-      background: var(--gold-mid);
-      transform: rotate(45deg);
-      flex-shrink: 0;
-    }
-
-    .ornament-diamond-sm {
-      width: 3px;
-      height: 3px;
-      background: var(--gold-muted);
-      transform: rotate(45deg);
-      flex-shrink: 0;
-    }
-
-    /* ── Error box ── */
-    .error {
-      display: none;
-      align-items: flex-start;
-      gap: 14px;
-      background: rgba(180, 30, 30, 0.12);
-      border: 1px solid rgba(200, 60, 60, 0.4);
-      border-left: 3px solid #e05050;
-      border-radius: 4px;
-      padding: 16px 20px;
-      margin-bottom: 28px;
-      animation: fadeIn 0.3s ease;
-    }
-
-    .error-icon {
-      color: #e05050;
-      font-size: 16px;
-      margin-top: 1px;
-      flex-shrink: 0;
-    }
-
-    .error-content {
-      flex: 1;
-    }
-
-    .error-title {
-      font-family: 'Cinzel', serif;
-      font-size: 11px;
-      letter-spacing: 0.15em;
-      color: #e05050;
-      text-transform: uppercase;
-      margin-bottom: 4px;
-    }
-
-    #errortext {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      color: #c07070;
-      line-height: 1.5;
-    }
-
-    .error button {
-      background: rgba(200, 60, 60, 0.15);
-      border: 1px solid rgba(200, 60, 60, 0.4);
-      color: #e05050;
-      font-family: 'Cinzel', serif;
-      font-size: 10px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      padding: 7px 14px;
-      border-radius: 3px;
-      cursor: pointer;
-      transition: all 0.2s;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-
-    .error button:hover {
-      background: rgba(200, 60, 60, 0.25);
-    }
-
-    /* ── Card ── */
-    .card {
-      background: var(--black-card);
-      border: 1px solid var(--black-border);
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: var(--shadow-deep), var(--shadow-gold);
-      position: relative;
-    }
-
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--gold-muted), var(--gold-mid), var(--gold-muted), transparent);
-    }
-
-    .card-header {
-      padding: 20px 28px 18px;
-      border-bottom: 1px solid var(--black-border);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: linear-gradient(180deg, rgba(212,160,23,0.04) 0%, transparent 100%);
-    }
-
-    .card-header-icon {
-      width: 32px;
-      height: 32px;
-      background: linear-gradient(135deg, var(--gold-ghost), rgba(212,160,23,0.06));
-      border: 1px solid var(--gold-muted);
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .card-header-icon i {
-      font-size: 13px;
-      color: var(--gold-mid);
-    }
-
-    .card-header-text {
-      flex: 1;
-    }
-
-    .card-title {
-      font-family: 'Cinzel', serif;
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.15em;
-      color: var(--text-primary);
-      text-transform: uppercase;
-    }
-
-    .card-subtitle {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 12px;
-      font-style: italic;
-      color: var(--text-muted);
-      margin-top: 1px;
-    }
-
-    .card-body {
-      padding: 28px;
-    }
-
-    /* ── Form elements ── */
-    .form {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .labeled-input {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .labeled-input label {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--gold-mid);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .labeled-input label i {
-      font-size: 9px;
-      opacity: 0.7;
-    }
-
-    .labeled-input label .label-optional {
-      font-family: 'Cormorant Garamond', serif;
-      font-style: italic;
-      font-size: 11px;
-      letter-spacing: 0;
-      text-transform: none;
-      color: var(--text-muted);
-      margin-left: 4px;
-    }
-
-    .input-wrapper {
-      position: relative;
-    }
-
-    .input-prefix {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--gold-muted);
-      font-size: 13px;
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    input[type="url"],
-    input[type="password"],
-    input[type="text"],
-    textarea {
-      width: 100%;
-      background: var(--black-panel);
-      border: 1px solid var(--black-border);
-      border-radius: 5px;
-      color: var(--text-primary);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
-      padding: 12px 16px;
-      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
-      outline: none;
-      -webkit-appearance: none;
-    }
-
-    input[type="url"] {
-      padding-left: 40px;
-    }
-
-    input[type="url"],
-    input[type="password"],
-    input[type="text"],
-    textarea {
-      caret-color: var(--gold-mid);
-    }
-
-    input::placeholder,
-    textarea::placeholder {
-      color: var(--text-muted);
-      font-size: 12px;
-    }
-
-    input:focus,
-    textarea:focus {
-      border-color: var(--gold-muted);
-      background: rgba(26, 20, 8, 0.6);
-      box-shadow: 0 0 0 3px rgba(212,160,23,0.06), 0 0 12px rgba(212,160,23,0.08);
-    }
-
-    input:valid:not(:placeholder-shown):not([type="checkbox"]) {
-      border-color: rgba(212,160,23,0.25);
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 80px;
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 14px;
-      line-height: 1.6;
-    }
-
-    .split-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-
-    @media (max-width: 480px) {
-      .split-row {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* ── Password toggle ── */
-    .password-wrapper {
-      position: relative;
-    }
-
-    .password-wrapper input {
-      padding-right: 44px;
-    }
-
-    .toggle-password {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-size: 13px;
-      padding: 4px;
-      transition: color 0.2s;
-      line-height: 1;
-    }
-
-    .toggle-password:hover {
-      color: var(--gold-mid);
-    }
-
-    /* ── Advanced details ── */
-    details {
-      background: var(--black-rich);
-      border: 1px solid var(--black-border);
-      border-radius: 5px;
-      overflow: hidden;
-    }
-
-    summary {
-      list-style: none;
-      padding: 12px 16px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      user-select: none;
-      transition: color 0.2s, background 0.2s;
-    }
-
-    summary:hover {
-      color: var(--gold-mid);
-      background: rgba(212,160,23,0.03);
-    }
-
-    summary::-webkit-details-marker { display: none; }
-
-    summary i {
-      font-size: 9px;
-      transition: transform 0.25s;
-    }
-
-    details[open] summary {
-      color: var(--gold-mid);
-      border-bottom: 1px solid var(--black-border);
-    }
-
-    details[open] summary i.fa-chevron-right {
-      transform: rotate(90deg);
-    }
-
-    .advanced {
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .advanced-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
-    }
-
-    /* ── Custom checkbox ── */
-    .custom-checkbox {
-      position: relative;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-
-    .custom-checkbox input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-      opacity: 0;
-      position: absolute;
-      cursor: pointer;
-      z-index: 1;
-    }
-
-    .checkbox-visual {
-      width: 18px;
-      height: 18px;
-      background: var(--black-panel);
-      border: 1px solid var(--black-border);
-      border-radius: 3px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-      pointer-events: none;
-    }
-
-    .checkbox-visual i {
-      font-size: 9px;
-      color: var(--black-rich);
-      opacity: 0;
-      transition: opacity 0.15s;
-    }
-
-    .custom-checkbox input:checked ~ .checkbox-visual {
-      background: linear-gradient(135deg, var(--gold-mid), var(--gold-deep));
-      border-color: var(--gold-mid);
-    }
-
-    .custom-checkbox input:checked ~ .checkbox-visual i {
-      opacity: 1;
-    }
-
-    .checkbox-label-group {
-      flex: 1;
-    }
-
-    .checkbox-label {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text-primary);
-      display: block;
-      line-height: 1.3;
-    }
-
-    .checkbox-desc {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 12px;
-      font-style: italic;
-      color: var(--text-muted);
-      margin-top: 2px;
-      line-height: 1.4;
-    }
-
-    /* ── Encrypt button ── */
-    #encrypt {
-      width: 100%;
-      background: linear-gradient(135deg, var(--gold-mid) 0%, var(--gold-deep) 50%, var(--gold-mid) 100%);
-      background-size: 200% 100%;
-      border: none;
-      border-radius: 5px;
-      color: var(--black-rich);
-      font-family: 'Cinzel', serif;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      padding: 16px 24px;
-      cursor: pointer;
-      transition: background-position 0.4s, transform 0.15s, box-shadow 0.3s;
-      box-shadow: 0 4px 20px rgba(212,160,23,0.3), 0 0 0 1px rgba(212,160,23,0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      position: relative;
-      overflow: hidden;
-      margin-top: 4px;
-    }
-
-    #encrypt::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%);
-    }
-
-    #encrypt:hover {
-      background-position: 100% 0;
-      box-shadow: 0 6px 30px rgba(212,160,23,0.45), 0 0 0 1px rgba(245,200,66,0.4);
-      transform: translateY(-1px);
-    }
-
-    #encrypt:active {
-      transform: translateY(0);
-      box-shadow: 0 2px 10px rgba(212,160,23,0.2);
-    }
-
-    #encrypt i {
-      font-size: 13px;
-    }
-
-    /* ── Output card ── */
-    .output-card {
-      margin-top: 24px;
-    }
-
-    .output {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .output-input-row {
-      display: flex;
-      gap: 10px;
-      align-items: stretch;
-    }
-
-    .output-input-row input {
-      flex: 1;
-      background: rgba(212,160,23,0.04);
-      border-color: rgba(212,160,23,0.2);
-      color: var(--gold-mid);
-      font-size: 11px;
-    }
-
-    #copy {
-      background: transparent;
-      border: 1px solid var(--gold-muted);
-      border-radius: 5px;
-      color: var(--gold-mid);
-      font-family: 'Cinzel', serif;
-      font-size: 10px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      padding: 12px 18px;
-      cursor: pointer;
-      transition: all 0.2s;
-      white-space: nowrap;
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      flex-shrink: 0;
-    }
-
-    #copy:hover {
-      background: rgba(212,160,23,0.08);
-      border-color: var(--gold-mid);
-      box-shadow: var(--glow-gold);
-    }
-
-    #copy i {
-      font-size: 11px;
-    }
-
-    .alert {
-      display: none;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--gold-mid);
-      text-align: center;
-      padding: 8px;
-      background: rgba(212,160,23,0.06);
-      border: 1px solid rgba(212,160,23,0.15);
-      border-radius: 4px;
-      animation: fadeIn 0.3s ease;
-    }
-
-    .alert.show {
-      display: block;
-    }
-
-    /* ── Noscript ── */
-    .noscript-warning {
-      background: rgba(180, 100, 20, 0.1);
-      border: 1px solid rgba(200, 120, 30, 0.4);
-      border-left: 3px solid var(--gold-mid);
-      border-radius: 4px;
-      padding: 20px 24px;
-      margin-bottom: 28px;
-    }
-
-    .noscript-warning p {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 15px;
-      line-height: 1.7;
-      color: var(--text-secondary);
-      margin-bottom: 12px;
-    }
-
-    .noscript-warning p:last-child {
-      margin-bottom: 0;
-    }
-
-    .noscript-warning a {
-      color: var(--gold-mid);
-      text-decoration: none;
-      border-bottom: 1px solid rgba(212,160,23,0.3);
-      transition: border-color 0.2s, color 0.2s;
-    }
-
-    .noscript-warning a:hover {
-      color: var(--gold-bright);
-      border-color: var(--gold-bright);
-    }
-
-    /* ── Footer ── */
-    .site-footer {
-      margin-top: 48px;
-      text-align: center;
-    }
-
-    ooter-divider {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 20px;
-    }
-
-    .footer-divider-line {
-      flex: 1;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--black-border), transparent);
-    }
-
-    .footer-ornament {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .footer-copyright {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 12px;
-      font-style: italic;
-      color: var(--text-muted);
-      letter-spacing: 0.05em;
-    }
-
-    .footer-copyright span {
-      color: var(--gold-muted);
-    }
-
-    .footer-tech {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 9px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--black-border);
-      margin-top: 8px;
-    }
-
-    /* ── Animations ── */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-6px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .page-wrapper {
-      animation: fadeIn 0.6s ease;
-    }
-
-    /* ── Noscript override ── */
-    noscript .noscript-warning { display: block; }
+    *{box-sizing:border-box}
+    body,input,textarea,button{font-family:'Syne',sans-serif}
+    input[type=checkbox]{accent-color:#ca8a04;width:15px;height:15px;cursor:pointer;flex-shrink:0}
+    input:focus,textarea:focus{outline:none}
+    ::placeholder{color:#52524d}
+    details>summary{list-style:none}
+    details>summary::-webkit-details-marker{display:none}
   </style>
+
+  <script type="text/javascript" src="../b64.js"><\/script>
+  <script type="text/javascript" src="../api.js"><\/script>
+  <script type="text/javascript">
+    function error(t){document.querySelector(".err").style.display="flex";document.querySelector("#errortext").innerText=t}
+    function main(){if(!("b64"in window)){error("Base64 library not loaded.");return}if(!("apiVersions"in window)){error("API library not loaded.");return}}
+    function togglePass(id,btn){var i=document.getElementById(id),ic=btn.querySelector('i');if(i.type==='password'){i.type='text';ic.className='fa-regular fa-eye-slash'}else{i.type='password';ic.className='fa-regular fa-eye'}}
+    function onCopy(id){var v=document.getElementById(id)&&document.getElementById(id).value;if(!v)return;navigator.clipboard?navigator.clipboard.writeText(v):(document.getElementById(id).select(),document.execCommand('copy'));var a=document.getElementById('ca');if(a){a.style.display='block';setTimeout(function(){a.style.display='none'},2200)}}
+  <\/script>
+  <script type="text/javascript" src="create.js"><\/script>
 </head>
 
-<body onload="main()">
-  <div class="page-wrapper">
+<body class="bg-ink-900 text-white min-h-screen" onload="main()">
 
-    <!-- Noscript warning -->
-    <noscript>
-      <div class="noscript-warning">
-        <p><strong>JavaScript is required.</strong> This application runs entirely in your browser to ensure no data is ever sent to a server. Please enable JavaScript to continue.</p>
-        <p>You may also <a href="https://github.com/jstrieb/link-lock">clone the source code</a> and run it locally on a trusted machine.</p>
-      </div>
-    </noscript>
-
-    <!-- Error box -->
-    <div class="error" style="display: none;">
-      <span class="error-icon"><i class="fa-solid fa-triangle-exclamation"></i></span>
-      <div class="error-content">
-        <div class="error-title">Encryption Error</div>
-        <p id="errortext">Error</p>
-      </div>
-      <button onclick="main()"><i class="fa-solid fa-rotate-right"></i> Retry</button>
+  <noscript>
+    <div class="max-w-lg mx-auto mt-8 p-5 border border-yellow-700 rounded-lg bg-yellow-950 text-yellow-200 text-sm">
+      JavaScript is required. Please enable it or <a href="https://github.com/jstrieb/link-lock" class="underline">clone the source</a>.
     </div>
+  </noscript>
+
+  <!-- Error -->
+  <div class="err max-w-lg mx-auto px-4 pt-5" style="display:none">
+    <div class="flex items-center gap-3 bg-red-950 border border-red-800 border-l-4 border-l-red-500 rounded-md p-4 w-full">
+      <i class="fa-solid fa-circle-exclamation text-red-400"></i>
+      <p id="errortext" class="font-mono text-xs text-red-400 flex-1"></p>
+      <button onclick="main()" class="text-red-400 border border-red-700 rounded px-3 py-1 text-xs font-semibold uppercase tracking-wide hover:bg-red-900 transition-colors">Retry</button>
+    </div>
+  </div>
+
+  <div class="max-w-lg mx-auto px-4 pb-16">
 
     <!-- Header -->
-    <header class="site-header">
-      <div class="header-badge">
-        <i class="fa-solid fa-shield-halved"></i>
-        AES-256 Browser Encryption
+    <div class="text-center pt-12 pb-10">
+      <div class="w-14 h-14 mx-auto mb-5 rounded-full bg-ink-700 border border-gold flex items-center justify-center" style="box-shadow:0 0 28px rgba(202,138,4,.22)">
+        <i class="fa-solid fa-lock text-gold-light text-xl"></i>
       </div>
-
-      <div class="header-icon">
-        <i class="fa-solid fa-lock"></i>
+      <div class="inline-flex items-center gap-2 mb-5 px-3 py-1 rounded-full bg-ink-700 border border-ink-500">
+        <span class="w-1.5 h-1.5 rounded-full bg-gold-light"></span>
+        <span class="font-mono text-gold text-xs tracking-widest uppercase">AES-256 Encrypted</span>
       </div>
-
-      <h1 class="site-title">Link Lock</h1>
-      <p class="site-subtitle">Encrypt &amp; protect your private links with a password</p>
-      <p class="site-tagline"><i class="fa-solid fa-circle" style="font-size:5px; vertical-align:middle; color:var(--gold-muted);"></i>&nbsp; Client-side &nbsp;<i class="fa-solid fa-circle" style="font-size:5px; vertical-align:middle; color:var(--gold-muted);"></i>&nbsp; Zero-server &nbsp;<i class="fa-solid fa-circle" style="font-size:5px; vertical-align:middle; color:var(--gold-muted);"></i>&nbsp; Auditable &nbsp;<i class="fa-solid fa-circle" style="font-size:5px; vertical-align:middle; color:var(--gold-muted);"></i></p>
-    </header>
-
-    <!-- Ornament divider -->
-    <div class="ornament-divider">
-      <div class="ornament-diamond-sm"></div>
-      <div class="ornament-diamond"></div>
-      <div class="ornament-diamond-sm"></div>
+      <h1 class="font-display text-4xl font-extrabold tracking-tight text-white mb-2">Link Lock</h1>
+      <p class="font-display text-sm font-medium text-ink-200 tracking-wide">Password-protect any URL — encrypted entirely in your browser</p>
+      <div class="flex items-center gap-3 mt-6 max-w-xs mx-auto">
+        <div class="flex-1 h-px bg-ink-500"></div>
+        <div class="flex gap-1.5 items-center">
+          <span class="w-1 h-1 rotate-45 bg-gold-dim inline-block"></span>
+          <span class="w-2 h-2 rotate-45 bg-gold inline-block"></span>
+          <span class="w-1 h-1 rotate-45 bg-gold-dim inline-block"></span>
+        </div>
+        <div class="flex-1 h-px bg-ink-500"></div>
+      </div>
     </div>
 
-    <!-- Main form card -->
-    <div class="card">
-      <div class="card-header">
-        <div class="card-header-icon">
-          <i class="fa-solid fa-key"></i>
+    <!-- Form Card -->
+    <div class="bg-ink-800 border border-ink-500 rounded-xl overflow-hidden mb-4" style="box-shadow:0 8px 40px rgba(0,0,0,.6)">
+
+      <!-- Card Header -->
+      <div class="bg-ink-700 border-b border-ink-500 px-6 py-4 flex items-center gap-3">
+        <div class="w-8 h-8 rounded-md bg-ink-600 border border-ink-400 flex items-center justify-center">
+          <i class="fa-solid fa-key text-gold text-xs"></i>
         </div>
-        <div class="card-header-text">
-          <div class="card-title">Create Encrypted Link</div>
-          <div class="card-subtitle">Wrap any URL behind a password gate</div>
+        <div>
+          <p class="font-display font-bold text-sm text-white tracking-wide">Create Encrypted Link</p>
+          <p class="font-mono text-xs text-ink-300 mt-0.5">Wrap any URL behind a password gate</p>
         </div>
       </div>
-      <div class="card-body">
-        <div class="form">
 
-          <!-- URL -->
-          <div class="labeled-input">
-            <label for="url">
-              <i class="fa-solid fa-link"></i>
-              Secret Link
+      <div class="p-6 flex flex-col gap-5">
+
+        <!-- URL -->
+        <div>
+          <label class="font-mono text-xs uppercase tracking-widest text-gold flex items-center gap-2 mb-2">
+            <i class="fa-solid fa-link text-xs"></i> Secret Link
+          </label>
+          <div class="relative">
+            <i class="fa-solid fa-globe absolute left-3 top-1/2 -translate-y-1/2 text-ink-300 text-xs pointer-events-none"></i>
+            <input type="url" id="url"
+              class="w-full bg-ink-700 border border-ink-500 rounded-md text-white font-mono text-sm py-3 pr-3 pl-8 focus:border-gold transition-colors"
+              style="caret-color:#ca8a04"
+              placeholder="https://your-secret-url.com"
+              oninvalid="if(!this.validity.customError)this.setCustomValidity('Please enter a valid URL including http:// or https://')"
+              oninput="this.setCustomValidity('')" required />
+          </div>
+        </div>
+
+        <!-- Hint -->
+        <div>
+          <label class="font-mono text-xs uppercase tracking-widest text-gold flex items-center gap-2 mb-2">
+            <i class="fa-regular fa-comment-dots text-xs"></i> Hint
+            <span class="normal-case tracking-normal text-ink-300 font-normal ml-1">— optional</span>
+          </label>
+          <textarea id="hint" rows="2"
+            class="w-full bg-ink-700 border border-ink-500 rounded-md text-white font-mono text-sm p-3 resize-none focus:border-gold transition-colors"
+            style="caret-color:#ca8a04"
+            placeholder="A subtle clue for the recipient"></textarea>
+        </div>
+
+        <!-- Passwords -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="font-mono text-xs uppercase tracking-widest text-gold flex items-center gap-2 mb-2">
+              <i class="fa-solid fa-key text-xs"></i> Password
             </label>
-            <div class="input-wrapper">
-              <span class="input-prefix"><i class="fa-solid fa-globe"></i></span>
-              <input type="url" id="url" placeholder="https://your-secret-url.com"
-                oninvalid="if (!this.validity.customError) this.setCustomValidity('Please enter a valid URL including http:// or https://')"
-                oninput="this.setCustomValidity('')" required />
+            <div class="relative">
+              <input type="password" id="password"
+                class="w-full bg-ink-700 border border-ink-500 rounded-md text-white font-mono text-sm py-3 pl-3 pr-9 focus:border-gold transition-colors"
+                style="caret-color:#ca8a04" placeholder="Enter password" />
+              <button type="button" onclick="togglePass('password',this)" tabindex="-1"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-ink-300 hover:text-gold transition-colors text-sm">
+                <i class="fa-regular fa-eye"></i>
+              </button>
             </div>
           </div>
-
-          <!-- Hint -->
-          <div class="labeled-input">
-            <label for="hint">
-              <i class="fa-regular fa-comment-dots"></i>
-              Password Hint
-              <span class="label-optional">— optional</span>
+          <div>
+            <label class="font-mono text-xs uppercase tracking-widest text-gold flex items-center gap-2 mb-2">
+              <i class="fa-solid fa-shield-halved text-xs"></i> Confirm
             </label>
-            <textarea id="hint" rows="2" placeholder="A subtle clue for the recipient…"></textarea>
-          </div>
-
-          <!-- Password row -->
-          <div class="split-row">
-            <div class="labeled-input">
-              <label for="password">
-                <i class="fa-solid fa-key"></i>
-                Password
-              </label>
-              <div class="password-wrapper">
-                <input type="password" id="password" placeholder="Enter password" />
-                <button class="toggle-password" type="button" onclick="togglePass('password', this)" tabindex="-1">
-                  <i class="fa-regular fa-eye"></i>
-                </button>
-              </div>
-            </div>
-            <div class="labeled-input">
-              <label for="confirm-password">
-                <i class="fa-solid fa-shield-check"></i>
-                Confirm
-              </label>
-              <div class="password-wrapper">
-                <input type="password" id="confirm-password" placeholder="Repeat password"
-                  oninput="this.setCustomValidity('')" />
-                <button class="toggle-password" type="button" onclick="togglePass('confirm-password', this)" tabindex="-1">
-                  <i class="fa-regular fa-eye"></i>
-                </button>
-              </div>
+            <div class="relative">
+              <input type="password" id="confirm-password"
+                class="w-full bg-ink-700 border border-ink-500 rounded-md text-white font-mono text-sm py-3 pl-3 pr-9 focus:border-gold transition-colors"
+                style="caret-color:#ca8a04" placeholder="Repeat password" oninput="this.setCustomValidity('')" />
+              <button type="button" onclick="togglePass('confirm-password',this)" tabindex="-1"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-ink-300 hover:text-gold transition-colors text-sm">
+                <i class="fa-regular fa-eye"></i>
+              </button>
             </div>
           </div>
+        </div>
 
-          <!-- Advanced -->
-          <details>
-            <summary>
-              <i class="fa-solid fa-chevron-right"></i>
-              Advanced Options
-            </summary>
-            <div class="advanced" id="advanced">
-              <div class="advanced-row">
-                <label class="custom-checkbox">
-                  <input type="checkbox" id="iv" onclick="onIvCheck(this)" checked />
-                  <div class="checkbox-visual"><i class="fa-solid fa-check"></i></div>
-                </label>
-                <div class="checkbox-label-group">
-                  <span class="checkbox-label">Random Initialization Vector</span>
-                  <span class="checkbox-desc">Generates a unique IV per encryption — strongly recommended for security</span>
-                </div>
+        <!-- Advanced -->
+        <details class="border border-ink-500 rounded-md overflow-hidden">
+          <summary class="flex items-center gap-2.5 px-4 py-3 cursor-pointer text-ink-300 hover:text-gold hover:bg-ink-700 transition-colors select-none">
+            <i class="fa-solid fa-sliders text-xs"></i>
+            <span class="font-mono text-xs uppercase tracking-widest">Advanced Options</span>
+            <i class="fa-solid fa-chevron-down text-xs ml-auto transition-transform" id="adv-arrow"></i>
+          </summary>
+          <div id="advanced" class="bg-ink-700 border-t border-ink-500 px-4 py-4 flex flex-col gap-4">
+            <label class="flex items-start gap-3 cursor-pointer group">
+              <input type="checkbox" id="iv" onclick="onIvCheck(this)" checked class="mt-0.5" />
+              <div>
+                <p class="font-display font-semibold text-sm text-white group-hover:text-gold transition-colors">Random Initialization Vector</p>
+                <p class="font-mono text-xs text-ink-300 mt-1">Generates a unique IV per encryption — strongly recommended</p>
               </div>
-              <div class="advanced-row">
-                <label class="custom-checkbox">
-                  <input type="checkbox" id="salt" />
-                  <div class="checkbox-visual"><i class="fa-solid fa-check"></i></div>
-                </label>
-                <div class="checkbox-label-group">
-                  <span class="checkbox-label">Random Salt</span>
-                  <span class="checkbox-desc">Adds entropy to the key derivation function, increasing brute-force resistance</span>
-                </div>
+            </label>
+            <label class="flex items-start gap-3 cursor-pointer group">
+              <input type="checkbox" id="salt" class="mt-0.5" />
+              <div>
+                <p class="font-display font-semibold text-sm text-white group-hover:text-gold transition-colors">Random Salt</p>
+                <p class="font-mono text-xs text-ink-300 mt-1">Adds entropy to key derivation, increasing brute-force resistance</p>
               </div>
-            </div>
-          </details>
+            </label>
+          </div>
+        </details>
 
-          <!-- Encrypt button -->
-          <button id="encrypt" onclick="onEncrypt()">
-            <i class="fa-solid fa-lock"></i>
-            Encrypt Link
+        <!-- Encrypt Button -->
+        <button id="encrypt" onclick="onEncrypt()"
+          class="w-full flex items-center justify-center gap-2.5 bg-gold hover:bg-gold-dim text-ink-900 font-display font-bold text-sm uppercase tracking-widest py-3.5 rounded-md transition-colors">
+          <i class="fa-solid fa-lock"></i> Encrypt Link
+        </button>
+
+      </div>
+    </div>
+
+    <!-- Output Card -->
+    <div class="bg-ink-800 border border-ink-500 rounded-xl overflow-hidden" style="box-shadow:0 8px 40px rgba(0,0,0,.6)">
+      <div class="bg-ink-700 border-b border-ink-500 px-6 py-4 flex items-center gap-3">
+        <div class="w-8 h-8 rounded-md bg-ink-600 border border-ink-400 flex items-center justify-center">
+          <i class="fa-regular fa-clipboard text-gold text-xs"></i>
+        </div>
+        <div>
+          <p class="font-display font-bold text-sm text-white tracking-wide">Encrypted Output</p>
+          <p class="font-mono text-xs text-ink-300 mt-0.5">Your protected link — ready to share</p>
+        </div>
+      </div>
+      <div class="p-6">
+        <label class="font-mono text-xs uppercase tracking-widest text-gold flex items-center gap-2 mb-2">
+          <i class="fa-solid fa-link text-xs"></i> Output
+        </label>
+        <div class="flex gap-3 mb-3">
+          <input type="text" id="output" readonly placeholder="Encrypted link will appear here…"
+            class="flex-1 bg-ink-700 border rounded-md font-mono text-sm py-3 px-3 text-gold focus:border-gold transition-colors"
+            style="border-color:rgba(202,138,4,.3)" />
+          <button id="copy" onclick="onCopy('output')"
+            class="flex items-center gap-2 border border-gold text-gold hover:bg-gold hover:text-ink-900 font-display font-semibold text-xs uppercase tracking-widest px-4 py-3 rounded-md transition-colors flex-shrink-0">
+            <i class="fa-regular fa-copy"></i> Copy
           </button>
-
         </div>
-      </div>
-    </div>
-
-    <!-- Output card -->
-    <div class="card output-card">
-      <div class="card-header">
-        <div class="card-header-icon">
-          <i class="fa-solid fa-copy"></i>
-        </div>
-        <div class="card-header-text">
-          <div class="card-title">Encrypted Output</div>
-          <div class="card-subtitle">Your protected link — ready to share</div>
-        </div>
-      </div>
-      <div class="card-body">
-        <div class="output">
-          <div class="output-input-row">
-            <input type="text" id="output" readonly placeholder="Encrypted link will appear here…" />
-            <button id="copy" onclick="onCopy('output')">
-              <i class="fa-regular fa-clipboard"></i>
-              Copy
-            </button>
-          </div>
-          <p class="alert" id="copied-alert">
-            <i class="fa-solid fa-circle-check"></i>&nbsp; Copied to clipboard
-          </p>
-        </div>
+        <p id="ca" class="font-mono text-xs uppercase tracking-widest text-gold bg-ink-700 border border-ink-500 rounded py-2 text-center" style="display:none">
+          <i class="fa-solid fa-circle-check mr-1.5"></i> Copied to clipboard
+        </p>
       </div>
     </div>
 
     <!-- Footer -->
-    <footer class="site-footer">
-      <div class="footer-divider">
-        <div class="footer-divider-line"></div>
-        <div class="footer-ornament">
-          <div class="ornament-diamond-sm"></div>
-          <div class="ornament-diamond" style="width:4px;height:4px;background:var(--gold-muted);"></div>
-          <div class="ornament-diamond-sm"></div>
+    <div class="text-center mt-12">
+      <div class="flex items-center gap-4 mb-5">
+        <div class="flex-1 h-px bg-ink-600"></div>
+        <div class="flex gap-1.5 items-center">
+          <span class="w-1 h-1 rotate-45 bg-ink-400 inline-block"></span>
+          <span class="w-1.5 h-1.5 rotate-45 bg-ink-400 inline-block"></span>
+          <span class="w-1 h-1 rotate-45 bg-ink-400 inline-block"></span>
         </div>
-        <div class="footer-divider-line"></div>
+        <div class="flex-1 h-px bg-ink-600"></div>
       </div>
-      <p class="footer-copyright">Crafted by <span>Anas Chawdhary</span></p>
-      <p class="footer-tech">AES-GCM · PBKDF2 · Zero Server · Open Source</p>
-    </footer>
+      <p class="font-display text-sm font-medium text-ink-300">Crafted by <span class="text-gold">Anas Chawdhary</span></p>
+      <p class="font-mono text-xs text-ink-400 mt-1.5 tracking-widest uppercase">AES-GCM · PBKDF2 · Zero Server · Open Source</p>
+    </div>
 
-  </div><!-- /page-wrapper -->
+  </div>
 
   <script>
-    // Password visibility toggle
-    function togglePass(id, btn) {
-      const input = document.getElementById(id);
-      const icon = btn.querySelector('i');
-      if (input.type === 'password') {
-        input.type = 'text';
-        icon.className = 'fa-regular fa-eye-slash';
-      } else {
-        input.type = 'password';
-        icon.className = 'fa-regular fa-eye';
-      }
-    }
+    document.querySelector('details').addEventListener('toggle',function(e){
+      var a=document.getElementById('adv-arrow');
+      if(a) a.style.transform=e.target.open?'rotate(180deg)':'';
+    });
+  <\/script>
 
-    // Override onCopy to show styled alert
-    const _origOnCopy = window.onCopy;
-    function onCopy(id) {
-      if (typeof _origOnCopy === 'function') {
-        _origOnCopy(id);
-      } else {
-        const val = document.getElementById(id).value;
-        if (val) navigator.clipboard.writeText(val).catch(() => {});
-      }
-      const alert = document.getElementById('copied-alert');
-      if (alert) {
-        alert.classList.add('show');
-        setTimeout(() => alert.classList.remove('show'), 2500);
-      }
-    }
-  </script>
 </body>
 </html>
