@@ -4,31 +4,31 @@
 <head>
   <meta charset="utf-8" />
   <meta name="author" content="Anas Chawdhary" />
-  <meta name="description" content="Elite AES Link Protection" />
+  <meta name="description" content="Elite Tier Link Encryption" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
 
-  <title>LINK LOCK | ELITE ENCRYPTION</title>
+  <title>VAULT LOCK | ANAS CHAWDHARY</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
     :root {
-      --gold-primary: #d4af37;
-      --gold-bright: #f9e29b;
-      --gold-dark: #aa841e;
-      --bg-deep: #050505;
-      --card-bg: #111111;
-      --input-bg: #1a1a1a;
-      --text-gold: #e2c275;
-      --border-gold: rgba(212, 175, 55, 0.3);
+      --emerald-dark: #022c22;
+      --emerald-glow: #059669;
+      --silver-main: #e2e8f0;
+      --silver-bright: #ffffff;
+      --deep-black: #0a0f0d;
+      --glass-bg: rgba(255, 255, 255, 0.03);
     }
 
     body {
-      background-color: var(--bg-deep);
-      background-image: radial-gradient(circle at center, #1a1a1a 0%, #050505 100%);
-      color: #ffffff;
-      font-family: 'Montserrat', sans-serif;
+      background-color: var(--deep-black);
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(5, 150, 105, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(5, 150, 105, 0.1) 0%, transparent 40%);
+      color: var(--silver-main);
+      font-family: 'Outfit', sans-serif;
       margin: 0;
       display: flex;
       justify-content: center;
@@ -37,68 +37,59 @@
       padding: 20px;
     }
 
-    /* Premium Card Container */
+    /* Premium Glass Container */
     .container {
-      background: var(--card-bg);
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
       width: 100%;
-      max-width: 550px;
-      padding: 50px;
-      border-radius: 2px; /* Sharp corners for premium look */
-      border: 1px solid var(--border-gold);
-      box-shadow: 0 0 40px rgba(0, 0, 0, 1), 0 0 15px rgba(212, 175, 55, 0.1);
+      max-width: 480px;
+      padding: 50px 40px;
+      border-radius: 30px;
+      border: 1px solid rgba(226, 232, 240, 0.1);
+      box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
       position: relative;
-      overflow: hidden;
-    }
-
-    /* Gold Border Accent */
-    .container::before {
-      content: "";
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 4px;
-      background: linear-gradient(90deg, var(--gold-dark), var(--gold-bright), var(--gold-dark));
     }
 
     header {
       text-align: center;
-      margin-bottom: 45px;
+      margin-bottom: 40px;
     }
 
-    /* Shining Font Effect */
+    /* Silver Metallic Shining Font */
     h1 {
-      font-family: 'Cinzel', serif;
-      font-size: 2.2rem;
+      font-family: 'Syncopate', sans-serif;
+      font-size: 1.8rem;
       margin: 0;
       text-transform: uppercase;
-      letter-spacing: 6px;
-      background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+      letter-spacing: 8px;
+      background: linear-gradient(to right, #94a3b8 0%, #ffffff 50%, #94a3b8 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 0 2px rgba(252, 246, 186, 0.3));
+      filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.2));
     }
 
     .subtitle {
-      color: var(--text-gold);
-      font-size: 0.75rem;
-      margin-top: 12px;
+      color: var(--emerald-glow);
+      font-size: 0.7rem;
+      margin-top: 15px;
       text-transform: uppercase;
-      letter-spacing: 4px;
-      opacity: 0.8;
-      font-weight: 500;
+      letter-spacing: 5px;
+      font-weight: 800;
     }
 
-    /* Form Inputs */
+    /* Vertical Form Styling */
     .form-group {
-      margin-bottom: 25px;
+      margin-bottom: 22px;
     }
 
     label {
       display: block;
-      font-size: 0.7rem;
-      font-weight: 700;
+      font-size: 0.75rem;
+      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 2px;
       margin-bottom: 10px;
-      color: var(--gold-primary);
+      color: rgba(226, 232, 240, 0.6);
     }
 
     input[type="url"],
@@ -106,116 +97,125 @@
     input[type="text"],
     textarea {
       width: 100%;
-      padding: 15px;
-      background: var(--input-bg);
-      border: 1px solid #333;
+      padding: 16px 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       color: #fff;
-      font-size: 0.9rem;
-      border-radius: 0; /* Sharp Edges */
-      transition: all 0.4s ease;
+      font-size: 1rem;
+      border-radius: 15px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       outline: none;
+      box-sizing: border-box;
     }
 
     input:focus, textarea:focus {
-      border-color: var(--gold-primary);
-      box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+      border-color: var(--emerald-glow);
+      background: rgba(5, 150, 105, 0.05);
+      box-shadow: 0 0 25px rgba(5, 150, 105, 0.2);
     }
 
-    .split-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-
-    /* Premium Button with Shining Effect */
+    /* Premium Button with Inner Shine */
     button {
       width: 100%;
-      padding: 16px;
-      background: linear-gradient(135deg, #bf953f 0%, #fcf6ba 50%, #aa771c 100%);
-      color: #000;
+      padding: 18px;
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+      color: #ffffff;
       border: none;
-      font-family: 'Montserrat', sans-serif;
-      font-size: 0.85rem;
+      border-radius: 15px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.9rem;
       font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 2px;
+      letter-spacing: 3px;
       cursor: pointer;
+      margin-top: 15px;
       transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
+      box-shadow: 0 10px 20px rgba(5, 150, 105, 0.3);
     }
 
     button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 30px rgba(5, 150, 105, 0.5);
       filter: brightness(1.1);
-      transform: scale(1.01);
-      box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
     }
 
-    /* Advanced Section */
+    /* Advanced Section Overlay */
     details {
       margin: 25px 0;
-      border: 1px solid #222;
+      border-radius: 15px;
+      overflow: hidden;
+      background: rgba(0,0,0,0.2);
     }
 
     summary {
-      padding: 12px;
+      padding: 15px;
       cursor: pointer;
-      color: var(--gold-primary);
-      font-size: 0.75rem;
-      font-weight: 700;
+      color: var(--silver-main);
+      font-size: 0.8rem;
+      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 2px;
-      background: #0a0a0a;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    summary::after {
+      content: '\2b45';
+      font-size: 10px;
+      color: var(--emerald-glow);
     }
 
     .advanced-content {
       padding: 20px;
-      background: #0a0a0a;
+      border-top: 1px solid rgba(255,255,255,0.05);
     }
 
-    /* Output Styling */
+    /* Output Section */
     .output-section {
       margin-top: 40px;
-      border-top: 1px solid #222;
       padding-top: 30px;
+      border-top: 1px solid rgba(255,255,255,0.05);
     }
 
     #output {
-      border: 1px solid var(--gold-dark);
-      background: #000;
-      color: var(--gold-bright);
-      text-align: center;
+      border: 1px solid var(--emerald-glow);
+      background: rgba(0, 0, 0, 0.4);
+      color: var(--emerald-glow);
+      letter-spacing: 1px;
     }
 
     #copy {
       background: transparent;
-      border: 1px solid var(--gold-primary);
-      color: var(--gold-primary);
-      margin-top: 15px;
+      border: 1px solid var(--silver-main);
+      color: var(--silver-main);
+      box-shadow: none;
     }
 
     #copy:hover {
-      background: var(--gold-primary);
-      color: #000;
+      background: var(--silver-main);
+      color: var(--deep-black);
     }
 
     footer {
       text-align: center;
       margin-top: 50px;
-      border-top: 1px solid #222;
-      padding-top: 20px;
     }
 
     .copyright {
-      color: var(--gold-bright);
-      font-weight: 700;
-      letter-spacing: 1px;
+      color: var(--silver-bright);
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-size: 0.7rem;
     }
 
-    /* Professional Scrollbar */
-    ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-track { background: #050505; }
-    ::-webkit-scrollbar-thumb { background: var(--gold-dark); }
+    /* Modern HD Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--deep-black); }
+    ::-webkit-scrollbar-thumb { background: var(--emerald-glow); border-radius: 10px; }
+
   </style>
 
   <script type="text/javascript" src="../b64.js"></script>
@@ -227,64 +227,60 @@
 
   <div class="container">
     <header>
-      <h1>Link Lock</h1>
-      <p class="subtitle">Secure Digital Vault — Anas Chawdhary Edition</p>
+      <h1>VAULT LOCK</h1>
+      <p class="subtitle">PREMIUM DIGITAL ENCRYPTION</p>
     </header>
 
     <div class="form">
       <div class="form-group">
-        <label><i class="fa-solid fa-crown"></i> Destination URL</label>
-        <input type="url" id="url" placeholder="https://premium-resource.com" required />
+        <label><i class="fa-solid fa-link"></i> Target Destination</label>
+        <input type="url" id="url" placeholder="Enter secure URL" required />
       </div>
 
       <div class="form-group">
-        <label><i class="fa-solid fa-comment"></i> Security Hint</label>
-        <textarea id="hint" rows="1" placeholder="Optional security clue"></textarea>
+        <label><i class="fa-solid fa-feather"></i> Private Hint</label>
+        <textarea id="hint" rows="1" placeholder="Optional security memo"></textarea>
       </div>
 
-      <div class="split-row">
-        <div class="form-group">
-          <label><i class="fa-solid fa-key"></i> Master Key</label>
-          <input type="password" id="password" placeholder="••••••••" />
-        </div>
-        <div class="form-group">
-          <label><i class="fa-solid fa-shield-check"></i> Verify</label>
-          <input type="password" id="confirm-password" placeholder="••••••••" />
-        </div>
+      <div class="form-group">
+        <label><i class="fa-solid fa-fingerprint"></i> Encryption Key</label>
+        <input type="password" id="password" placeholder="Create Master Password" />
+      </div>
+
+      <div class="form-group">
+        <label><i class="fa-solid fa-shield-halved"></i> Key Verification</label>
+        <input type="password" id="confirm-password" placeholder="Repeat Master Password" />
       </div>
 
       <details>
-        <summary>Advanced Protocol</summary>
+        <summary>System Parameters</summary>
         <div class="advanced-content">
-          <div style="display:flex; align-items:center; gap:10px;">
-            <input type="checkbox" id="iv" checked />
-            <label style="margin:0;">Enable IV Vector</label>
+          <div style="display:flex; align-items:center; gap:15px; margin-bottom: 10px;">
+            <input type="checkbox" id="iv" checked style="accent-color: var(--emerald-glow); width: 18px; height: 18px;" />
+            <label style="margin:0; text-transform: none; letter-spacing: 0;">Activate IV Vector</label>
           </div>
-          <br>
-          <div style="display:flex; align-items:center; gap:10px;">
-            <input type="checkbox" id="salt" checked />
-            <label style="margin:0;">Apply Random Salt</label>
+          <div style="display:flex; align-items:center; gap:15px;">
+            <input type="checkbox" id="salt" checked style="accent-color: var(--emerald-glow); width: 18px; height: 18px;" />
+            <label style="margin:0; text-transform: none; letter-spacing: 0;">Apply Random Salt</label>
           </div>
         </div>
       </details>
 
       <button id="encrypt" onclick="onEncrypt()">
-        Seal Securely
+        INITIATE SEAL
       </button>
     </div>
 
     <div class="output-section">
-      <label>Encrypted Output</label>
-      <input type="text" id="output" readonly placeholder="Awaiting Encryption..." />
+      <label>Secured Output</label>
+      <input type="text" id="output" readonly placeholder="Waiting for protocols..." />
       <button id="copy" onclick="onCopy('output')">
-        <i class="fa-solid fa-copy"></i> Copy To Vault
+        <i class="fa-solid fa-copy"></i> Copy To Clipboard
       </button>
     </div>
 
     <footer>
-      <p style="font-size: 0.65rem; color: #555; letter-spacing: 2px; text-transform: uppercase;">
-        Developed by <span class="copyright">Anas Chawdhary</span>
-      </p>
+      <p class="copyright">AUTHOR: ANAS CHAWDHARY</p>
     </footer>
   </div>
 
