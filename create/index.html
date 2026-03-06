@@ -2,52 +2,37 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 
 <head>
-  
   <SCRIPT language="JavaScript">
 <!--hide
-
- var password;
-var pass1="43261650";
-
-password=prompt('Please enter your password to view this page!','');
-
-if (password==pass1)
-  alert('Password Correct! Click on go!');
-else
-   {
-   alert('Password incorrect! Try again!');
-    window.location.reload();
-    }
-
 //-->
 </SCRIPT>
-  
-  <!-- Metadata -->
+
   <meta charset="utf-8" />
-  <meta name="author" content="Jacob Strieb" />
+  <meta name="author" content="Anas Chawdhary" />
   <meta name="description" content="Password protect links using AES in the browser." />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
 
-  //<link rel="shortcut icon" type="image/x-icon" href="../favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="../favicon.ico">
+  <title>Link Lock — Password-Protect Your Links</title>
 
-  <title>Link Lock - Password-protect links</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 
-  <!-- Styles -->
-  <link rel="stylesheet" href="../style.css" type="text/css" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
   <!-- Scripts -->
   <script type="text/javascript" src="../b64.js"></script>
   <script type="text/javascript" src="../api.js"></script>
   <script type="text/javascript">
     function error(text) {
-      document.querySelector(".error").style.display = "inherit";
-      document.querySelector("#errortext").innerText = `Error: ${text}`;
+      document.querySelector(".error").style.display = "flex";
+      document.querySelector("#errortext").innerText = `${text}`;
     }
 
-
-    
     function main() {
-    
       if (!("b64" in window)) {
         error("Base64 library not loaded.");
         return;
@@ -59,85 +44,1065 @@ else
     }
   </script>
   <script type="text/javascript" src="create.js"></script>
+
+  <style>
+    :root {
+      --black-deep:    #080808;
+      --black-rich:    #0e0e0e;
+      --black-card:    #131313;
+      --black-panel:   #1a1a1a;
+      --black-border:  #242424;
+      --black-hover:   #2a2a2a;
+
+      --gold-bright:   #f5c842;
+      --gold-mid:      #d4a017;
+      --gold-deep:     #a07810;
+      --gold-muted:    #6b530d;
+      --gold-ghost:    #2a1f06;
+
+      --text-primary:  #f0e8d0;
+      --text-secondary:#b8a880;
+      --text-muted:    #6b6050;
+
+      --shadow-gold:   0 0 30px rgba(212, 160, 23, 0.15);
+      --shadow-deep:   0 20px 60px rgba(0,0,0,0.8);
+      --glow-gold:     0 0 20px rgba(245, 200, 66, 0.3);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--black-deep);
+      color: var(--text-primary);
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* ── Background texture ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(212,160,23,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 90% 80%, rgba(212,160,23,0.04) 0%, transparent 50%),
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 60px,
+          rgba(255,255,255,0.008) 60px,
+          rgba(255,255,255,0.008) 61px
+        ),
+        repeating-linear-gradient(
+          90deg,
+          transparent,
+          transparent 60px,
+          rgba(255,255,255,0.008) 60px,
+          rgba(255,255,255,0.008) 61px
+        );
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Corner ornaments ── */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background:
+        radial-gradient(circle 3px at 20px 20px, var(--gold-muted) 100%, transparent),
+        radial-gradient(circle 3px at calc(100% - 20px) 20px, var(--gold-muted) 100%, transparent),
+        radial-gradient(circle 3px at 20px calc(100% - 20px), var(--gold-muted) 100%, transparent),
+        radial-gradient(circle 3px at calc(100% - 20px) calc(100% - 20px), var(--gold-muted) 100%, transparent);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .page-wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 48px 24px 64px;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      text-align: center;
+      margin-bottom: 52px;
+      position: relative;
+    }
+
+    .header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--gold-ghost), rgba(212,160,23,0.08));
+      border: 1px solid var(--gold-muted);
+      border-radius: 100px;
+      padding: 5px 16px;
+      margin-bottom: 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      color: var(--gold-mid);
+      text-transform: uppercase;
+    }
+
+    .header-badge i {
+      font-size: 9px;
+    }
+
+    .header-icon {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 20px;
+      background: linear-gradient(135deg, var(--black-panel), var(--black-card));
+      border: 1px solid var(--gold-muted);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-gold), inset 0 1px 0 rgba(245,200,66,0.1);
+      position: relative;
+    }
+
+    .header-icon::before {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 1px solid rgba(212,160,23,0.15);
+    }
+
+    .header-icon i {
+      font-size: 28px;
+      background: linear-gradient(135deg, var(--gold-bright), var(--gold-mid));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .site-title {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(28px, 6vw, 42px);
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      line-height: 1;
+      background: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold-mid) 50%, var(--gold-deep) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+
+    .site-subtitle {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 15px;
+      font-style: italic;
+      font-weight: 300;
+      color: var(--text-secondary);
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+
+    .site-tagline {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    /* ── Divider ── */
+    .ornament-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0 auto 40px;
+      max-width: 320px;
+    }
+
+    .ornament-divider::before,
+    .ornament-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold-muted));
+    }
+
+    .ornament-divider::after {
+      background: linear-gradient(90deg, var(--gold-muted), transparent);
+    }
+
+    .ornament-diamond {
+      width: 6px;
+      height: 6px;
+      background: var(--gold-mid);
+      transform: rotate(45deg);
+      flex-shrink: 0;
+    }
+
+    .ornament-diamond-sm {
+      width: 3px;
+      height: 3px;
+      background: var(--gold-muted);
+      transform: rotate(45deg);
+      flex-shrink: 0;
+    }
+
+    /* ── Error box ── */
+    .error {
+      display: none;
+      align-items: flex-start;
+      gap: 14px;
+      background: rgba(180, 30, 30, 0.12);
+      border: 1px solid rgba(200, 60, 60, 0.4);
+      border-left: 3px solid #e05050;
+      border-radius: 4px;
+      padding: 16px 20px;
+      margin-bottom: 28px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .error-icon {
+      color: #e05050;
+      font-size: 16px;
+      margin-top: 1px;
+      flex-shrink: 0;
+    }
+
+    .error-content {
+      flex: 1;
+    }
+
+    .error-title {
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      color: #e05050;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    #errortext {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: #c07070;
+      line-height: 1.5;
+    }
+
+    .error button {
+      background: rgba(200, 60, 60, 0.15);
+      border: 1px solid rgba(200, 60, 60, 0.4);
+      color: #e05050;
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 7px 14px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .error button:hover {
+      background: rgba(200, 60, 60, 0.25);
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--black-card);
+      border: 1px solid var(--black-border);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: var(--shadow-deep), var(--shadow-gold);
+      position: relative;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold-muted), var(--gold-mid), var(--gold-muted), transparent);
+    }
+
+    .card-header {
+      padding: 20px 28px 18px;
+      border-bottom: 1px solid var(--black-border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: linear-gradient(180deg, rgba(212,160,23,0.04) 0%, transparent 100%);
+    }
+
+    .card-header-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--gold-ghost), rgba(212,160,23,0.06));
+      border: 1px solid var(--gold-muted);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-header-icon i {
+      font-size: 13px;
+      color: var(--gold-mid);
+    }
+
+    .card-header-text {
+      flex: 1;
+    }
+
+    .card-title {
+      font-family: 'Cinzel', serif;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      color: var(--text-primary);
+      text-transform: uppercase;
+    }
+
+    .card-subtitle {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 12px;
+      font-style: italic;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    .card-body {
+      padding: 28px;
+    }
+
+    /* ── Form elements ── */
+    .form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .labeled-input {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .labeled-input label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold-mid);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .labeled-input label i {
+      font-size: 9px;
+      opacity: 0.7;
+    }
+
+    .labeled-input label .label-optional {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 11px;
+      letter-spacing: 0;
+      text-transform: none;
+      color: var(--text-muted);
+      margin-left: 4px;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-prefix {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gold-muted);
+      font-size: 13px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    input[type="url"],
+    input[type="password"],
+    input[type="text"],
+    textarea {
+      width: 100%;
+      background: var(--black-panel);
+      border: 1px solid var(--black-border);
+      border-radius: 5px;
+      color: var(--text-primary);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      padding: 12px 16px;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="url"] {
+      padding-left: 40px;
+    }
+
+    input[type="url"],
+    input[type="password"],
+    input[type="text"],
+    textarea {
+      caret-color: var(--gold-mid);
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: var(--gold-muted);
+      background: rgba(26, 20, 8, 0.6);
+      box-shadow: 0 0 0 3px rgba(212,160,23,0.06), 0 0 12px rgba(212,160,23,0.08);
+    }
+
+    input:valid:not(:placeholder-shown):not([type="checkbox"]) {
+      border-color: rgba(212,160,23,0.25);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .split-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 480px) {
+      .split-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ── Password toggle ── */
+    .password-wrapper {
+      position: relative;
+    }
+
+    .password-wrapper input {
+      padding-right: 44px;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 13px;
+      padding: 4px;
+      transition: color 0.2s;
+      line-height: 1;
+    }
+
+    .toggle-password:hover {
+      color: var(--gold-mid);
+    }
+
+    /* ── Advanced details ── */
+    details {
+      background: var(--black-rich);
+      border: 1px solid var(--black-border);
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    summary {
+      list-style: none;
+      padding: 12px 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      user-select: none;
+      transition: color 0.2s, background 0.2s;
+    }
+
+    summary:hover {
+      color: var(--gold-mid);
+      background: rgba(212,160,23,0.03);
+    }
+
+    summary::-webkit-details-marker { display: none; }
+
+    summary i {
+      font-size: 9px;
+      transition: transform 0.25s;
+    }
+
+    details[open] summary {
+      color: var(--gold-mid);
+      border-bottom: 1px solid var(--black-border);
+    }
+
+    details[open] summary i.fa-chevron-right {
+      transform: rotate(90deg);
+    }
+
+    .advanced {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .advanced-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    /* ── Custom checkbox ── */
+    .custom-checkbox {
+      position: relative;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .custom-checkbox input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      opacity: 0;
+      position: absolute;
+      cursor: pointer;
+      z-index: 1;
+    }
+
+    .checkbox-visual {
+      width: 18px;
+      height: 18px;
+      background: var(--black-panel);
+      border: 1px solid var(--black-border);
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      pointer-events: none;
+    }
+
+    .checkbox-visual i {
+      font-size: 9px;
+      color: var(--black-rich);
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .custom-checkbox input:checked ~ .checkbox-visual {
+      background: linear-gradient(135deg, var(--gold-mid), var(--gold-deep));
+      border-color: var(--gold-mid);
+    }
+
+    .custom-checkbox input:checked ~ .checkbox-visual i {
+      opacity: 1;
+    }
+
+    .checkbox-label-group {
+      flex: 1;
+    }
+
+    .checkbox-label {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: block;
+      line-height: 1.3;
+    }
+
+    .checkbox-desc {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 12px;
+      font-style: italic;
+      color: var(--text-muted);
+      margin-top: 2px;
+      line-height: 1.4;
+    }
+
+    /* ── Encrypt button ── */
+    #encrypt {
+      width: 100%;
+      background: linear-gradient(135deg, var(--gold-mid) 0%, var(--gold-deep) 50%, var(--gold-mid) 100%);
+      background-size: 200% 100%;
+      border: none;
+      border-radius: 5px;
+      color: var(--black-rich);
+      font-family: 'Cinzel', serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      padding: 16px 24px;
+      cursor: pointer;
+      transition: background-position 0.4s, transform 0.15s, box-shadow 0.3s;
+      box-shadow: 0 4px 20px rgba(212,160,23,0.3), 0 0 0 1px rgba(212,160,23,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    #encrypt::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%);
+    }
+
+    #encrypt:hover {
+      background-position: 100% 0;
+      box-shadow: 0 6px 30px rgba(212,160,23,0.45), 0 0 0 1px rgba(245,200,66,0.4);
+      transform: translateY(-1px);
+    }
+
+    #encrypt:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 10px rgba(212,160,23,0.2);
+    }
+
+    #encrypt i {
+      font-size: 13px;
+    }
+
+    /* ── Output card ── */
+    .output-card {
+      margin-top: 24px;
+    }
+
+    .output {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .output-input-row {
+      display: flex;
+      gap: 10px;
+      align-items: stretch;
+    }
+
+    .output-input-row input {
+      flex: 1;
+      background: rgba(212,160,23,0.04);
+      border-color: rgba(212,160,23,0.2);
+      color: var(--gold-mid);
+      font-size: 11px;
+    }
+
+    #copy {
+      background: transparent;
+      border: 1px solid var(--gold-muted);
+      border-radius: 5px;
+      color: var(--gold-mid);
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 12px 18px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-shrink: 0;
+    }
+
+    #copy:hover {
+      background: rgba(212,160,23,0.08);
+      border-color: var(--gold-mid);
+      box-shadow: var(--glow-gold);
+    }
+
+    #copy i {
+      font-size: 11px;
+    }
+
+    .alert {
+      display: none;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold-mid);
+      text-align: center;
+      padding: 8px;
+      background: rgba(212,160,23,0.06);
+      border: 1px solid rgba(212,160,23,0.15);
+      border-radius: 4px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .alert.show {
+      display: block;
+    }
+
+    /* ── Noscript ── */
+    .noscript-warning {
+      background: rgba(180, 100, 20, 0.1);
+      border: 1px solid rgba(200, 120, 30, 0.4);
+      border-left: 3px solid var(--gold-mid);
+      border-radius: 4px;
+      padding: 20px 24px;
+      margin-bottom: 28px;
+    }
+
+    .noscript-warning p {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+
+    .noscript-warning p:last-child {
+      margin-bottom: 0;
+    }
+
+    .noscript-warning a {
+      color: var(--gold-mid);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(212,160,23,0.3);
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .noscript-warning a:hover {
+      color: var(--gold-bright);
+      border-color: var(--gold-bright);
+    }
+
+    /* ── Footer ── */
+    .site-footer {
+      margin-top: 48px;
+      text-align: center;
+    }
+
+    ooter-divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .footer-divider-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--black-border), transparent);
+    }
+
+    .footer-ornament {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .footer-copyright {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 12px;
+      font-style: italic;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+    }
+
+    .footer-copyright span {
+      color: var(--gold-muted);
+    }
+
+    .footer-tech {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--black-border);
+      margin-top: 8px;
+    }
+
+    /* ── Animations ── */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .page-wrapper {
+      animation: fadeIn 0.6s ease;
+    }
+
+    /* ── Noscript override ── */
+    noscript .noscript-warning { display: block; }
+  </style>
 </head>
 
 <body onload="main()">
- 
+  <div class="page-wrapper">
 
-  <!-- Explanation for those who do not have JavaScript enabled -->
-  <noscript>
-  <div style="border: 3px solid red; padding: 2em;">
-    <p>If you are seeing this, it means that you have JavaScript disabled. As a result, the application will not work properly for you. For example, none of the buttons will work.</p>
-
-    <p>This application is entirely programmed in JavaScript. This was done intentionally, so that all encryption and decryption happens client-side. This means the code runs as a distributed application, relying only on GitHub Pages for infrastructure. It also means that no data about locked links is ever stored on a server. The code is designed to be auditable so users can investigate what is happening behind the scenes.</p>
-
-    <p>If you still want to run the application, I encourage you to clone the <a href="https://github.com/jstrieb/link-lock">source code on GitHub</a>. That way you can disable JavaScript only for trusted files on your local machine.</p>
-  </div>
-  </noscript>
-
-  <!-- Display errors in a big red box -->
-  <div class="error red-border" style="display: none">
-    <p id="errortext">Error</p>
-    <button onclick="main()">Try again</button>
-  </div>
-
-  <hr />
-
-  <!-- Main form -->
-  <div class="form">
-    <div class="labeled-input">
-      <label for="url">secret link</label>
-      <input type="url" id="url" placeholder="https://" oninvalid="if (!this.validity.customError) this.setCustomValidity('Please enter a valid URL. Make sure to include \'http://\' or \'https://\' at the beginning.')" oninput="this.setCustomValidity('')" required />
-    </div>
-    <div class="labeled-input hint">
-      <label for="url">hint (optional)</label>
-      <textarea id="hint" rows="1"></textarea>
-    </div>
-    <div class="split-row">
-      <div class="labeled-input password">
-        <label for="password">password</label>
-        <input type="password" id="password" />
+    <!-- Noscript warning -->
+    <noscript>
+      <div class="noscript-warning">
+        <p><strong>JavaScript is required.</strong> This application runs entirely in your browser to ensure no data is ever sent to a server. Please enable JavaScript to continue.</p>
+        <p>You may also <a href="https://github.com/jstrieb/link-lock">clone the source code</a> and run it locally on a trusted machine.</p>
       </div>
-      <div class="labeled-input confirm-password">
-        <label for="confirm-password">confirm password</label>
-        <input type="password" id="confirm-password" oninput="this.setCustomValidity('')" />
+    </noscript>
+
+    <!-- Error box -->
+    <div class="error" style="display: none;">
+      <span class="error-icon"><i class="fa-solid fa-triangle-exclamation"></i></span>
+      <div class="error-content">
+        <div class="error-title">Encryption Error</div>
+        <p id="errortext">Error</p>
       </div>
+      <button onclick="main()"><i class="fa-solid fa-rotate-right"></i> Retry</button>
     </div>
 
-    <!-- Advanced options (JavaScript-activated dropdown) -->
-    <details>
-      <summary id="advanced-label">advanced</summary>
-      <div class="advanced" id="advanced">
-        <div class="labeled-input">
-          <label for="iv">random initialization vector</label>
-          <input type="checkbox" id="iv" onclick="onIvCheck(this)" checked />
+    <!-- Header -->
+    <header class="site-header">
+      <div class="header-badge">
+        <i class="fa-solid fa-shield-halved"></i>
+        AES-256 Browser Encryption
+      </div>
+
+      <div class="header-icon">
+        <i class="fa-solid fa-lock"></i>
+      </div>
+
+      <h1 class="site-title">Link Lock</h1>
+      <p class="site-subtitle">Encrypt &amp; protect your private links with a password</p>
+      <p class="site-tagline"><i class="fa-solid fa-circle" style="font-size:5px; vertical-align:middle; color:var(--gold-muted);"></i>&nbsp; Client-side &nbsp;<i class="fa-solid fa-circle" style="font-size:5px; vertical-align:middle; color:var(--gold-muted);"></i>&nbsp; Zero-server &nbsp;<i class="fa-solid fa-circle" style="font-size:5px; vertical-align:middle; color:var(--gold-muted);"></i>&nbsp; Auditable &nbsp;<i class="fa-solid fa-circle" style="font-size:5px; vertical-align:middle; color:var(--gold-muted);"></i></p>
+    </header>
+
+    <!-- Ornament divider -->
+    <div class="ornament-divider">
+      <div class="ornament-diamond-sm"></div>
+      <div class="ornament-diamond"></div>
+      <div class="ornament-diamond-sm"></div>
+    </div>
+
+    <!-- Main form card -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon">
+          <i class="fa-solid fa-key"></i>
         </div>
-        <div class="labeled-input">
-          <label for="salt">random salt</label>
-          <input type="checkbox" id="salt" />
+        <div class="card-header-text">
+          <div class="card-title">Create Encrypted Link</div>
+          <div class="card-subtitle">Wrap any URL behind a password gate</div>
         </div>
       </div>
-    </details>
-    <button id="encrypt" onclick="onEncrypt()">Encrypt</button>
-  </div>
+      <div class="card-body">
+        <div class="form">
 
-  <hr />
+          <!-- URL -->
+          <div class="labeled-input">
+            <label for="url">
+              <i class="fa-solid fa-link"></i>
+              Secret Link
+            </label>
+            <div class="input-wrapper">
+              <span class="input-prefix"><i class="fa-solid fa-globe"></i></span>
+              <input type="url" id="url" placeholder="https://your-secret-url.com"
+                oninvalid="if (!this.validity.customError) this.setCustomValidity('Please enter a valid URL including http:// or https://')"
+                oninput="this.setCustomValidity('')" required />
+            </div>
+          </div>
 
-  <!-- Output area -->
-  <div class="output">
-    <label for="output">output</label>
-    <input type="text" id="output" readonly/>
-    <button id="copy" onclick="onCopy('output')">Copy</button>
+          <!-- Hint -->
+          <div class="labeled-input">
+            <label for="hint">
+              <i class="fa-regular fa-comment-dots"></i>
+              Password Hint
+              <span class="label-optional">— optional</span>
+            </label>
+            <textarea id="hint" rows="2" placeholder="A subtle clue for the recipient…"></textarea>
+          </div>
 
-    </form>
-    <p class="alert">Copied</p>
-  </div>
+          <!-- Password row -->
+          <div class="split-row">
+            <div class="labeled-input">
+              <label for="password">
+                <i class="fa-solid fa-key"></i>
+                Password
+              </label>
+              <div class="password-wrapper">
+                <input type="password" id="password" placeholder="Enter password" />
+                <button class="toggle-password" type="button" onclick="togglePass('password', this)" tabindex="-1">
+                  <i class="fa-regular fa-eye"></i>
+                </button>
+              </div>
+            </div>
+            <div class="labeled-input">
+              <label for="confirm-password">
+                <i class="fa-solid fa-shield-check"></i>
+                Confirm
+              </label>
+              <div class="password-wrapper">
+                <input type="password" id="confirm-password" placeholder="Repeat password"
+                  oninput="this.setCustomValidity('')" />
+                <button class="toggle-password" type="button" onclick="togglePass('confirm-password', this)" tabindex="-1">
+                  <i class="fa-regular fa-eye"></i>
+                </button>
+              </div>
+            </div>
+          </div>
 
-  <!-- Page footer -->
-  <footer>
-  <hr />
-  <p class="copyright">Created by Anas chawdhary</p>
-  </footer>
+          <!-- Advanced -->
+          <details>
+            <summary>
+              <i class="fa-solid fa-chevron-right"></i>
+              Advanced Options
+            </summary>
+            <div class="advanced" id="advanced">
+              <div class="advanced-row">
+                <label class="custom-checkbox">
+                  <input type="checkbox" id="iv" onclick="onIvCheck(this)" checked />
+                  <div class="checkbox-visual"><i class="fa-solid fa-check"></i></div>
+                </label>
+                <div class="checkbox-label-group">
+                  <span class="checkbox-label">Random Initialization Vector</span>
+                  <span class="checkbox-desc">Generates a unique IV per encryption — strongly recommended for security</span>
+                </div>
+              </div>
+              <div class="advanced-row">
+                <label class="custom-checkbox">
+                  <input type="checkbox" id="salt" />
+                  <div class="checkbox-visual"><i class="fa-solid fa-check"></i></div>
+                </label>
+                <div class="checkbox-label-group">
+                  <span class="checkbox-label">Random Salt</span>
+                  <span class="checkbox-desc">Adds entropy to the key derivation function, increasing brute-force resistance</span>
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <!-- Encrypt button -->
+          <button id="encrypt" onclick="onEncrypt()">
+            <i class="fa-solid fa-lock"></i>
+            Encrypt Link
+          </button>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Output card -->
+    <div class="card output-card">
+      <div class="card-header">
+        <div class="card-header-icon">
+          <i class="fa-solid fa-copy"></i>
+        </div>
+        <div class="card-header-text">
+          <div class="card-title">Encrypted Output</div>
+          <div class="card-subtitle">Your protected link — ready to share</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="output">
+          <div class="output-input-row">
+            <input type="text" id="output" readonly placeholder="Encrypted link will appear here…" />
+            <button id="copy" onclick="onCopy('output')">
+              <i class="fa-regular fa-clipboard"></i>
+              Copy
+            </button>
+          </div>
+          <p class="alert" id="copied-alert">
+            <i class="fa-solid fa-circle-check"></i>&nbsp; Copied to clipboard
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+      <div class="footer-divider">
+        <div class="footer-divider-line"></div>
+        <div class="footer-ornament">
+          <div class="ornament-diamond-sm"></div>
+          <div class="ornament-diamond" style="width:4px;height:4px;background:var(--gold-muted);"></div>
+          <div class="ornament-diamond-sm"></div>
+        </div>
+        <div class="footer-divider-line"></div>
+      </div>
+      <p class="footer-copyright">Crafted by <span>Anas Chawdhary</span></p>
+      <p class="footer-tech">AES-GCM · PBKDF2 · Zero Server · Open Source</p>
+    </footer>
+
+  </div><!-- /page-wrapper -->
+
+  <script>
+    // Password visibility toggle
+    function togglePass(id, btn) {
+      const input = document.getElementById(id);
+      const icon = btn.querySelector('i');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fa-regular fa-eye-slash';
+      } else {
+        input.type = 'password';
+        icon.className = 'fa-regular fa-eye';
+      }
+    }
+
+    // Override onCopy to show styled alert
+    const _origOnCopy = window.onCopy;
+    function onCopy(id) {
+      if (typeof _origOnCopy === 'function') {
+        _origOnCopy(id);
+      } else {
+        const val = document.getElementById(id).value;
+        if (val) navigator.clipboard.writeText(val).catch(() => {});
+      }
+      const alert = document.getElementById('copied-alert');
+      if (alert) {
+        alert.classList.add('show');
+        setTimeout(() => alert.classList.remove('show'), 2500);
+      }
+    }
+  </script>
 </body>
-
 </html>
